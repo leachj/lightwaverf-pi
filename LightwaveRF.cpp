@@ -5,7 +5,7 @@
 // Author: Lawrie Griffiths (lawrie.griffiths@ntlworld.com)
 // Copyright (C) 2013 Lawrie Griffiths
 
-#include <LightwaveRF.h>
+#include "LightwaveRF.h"
 
 static byte lw_nibble[] = {0xF6,0xEE,0xED,0xEB,0xDE,0xDD,0xDB,0xBE,
                      0xBD,0xBB,0xB7,0x7E,0x7D,0x7B,0x77,0x6F};
@@ -157,22 +157,24 @@ void lw_tx_setup(int tx_pin) {
 /**
   Set things up to receive LightwaveRF 434Mhz messages using the values specified
 **/
-void lw_rx_setup(int rx_pin, int interrupt) {
+void lw_rx_setup(int rx_pin) {
   lw_rx_pin = rx_pin;
   pinMode(lw_rx_pin,INPUT);
-  attachInterrupt(interrupt,lw_process_bits,CHANGE);
+  wiringPiISR(rx_pin,INT_EDGE_BOTH,lw_process_bits);
+  //attachInterrupt(rx_pin,lw_process_bits,CHANGE);
 }
 
 /**
   Set things up to transmit and receive LightwaveRF 434Mhz messages using the values specified
 **/
-boolean lw_setup(int tx_pin, int rx_pin, int interrupt) {
+boolean lw_setup(int tx_pin, int rx_pin) {
   if(tx_pin == rx_pin) {
     return false;
   }
   
+  wiringPiSetup();
   lw_tx_setup(tx_pin);
-  lw_rx_setup(rx_pin, interrupt);
+  lw_rx_setup(rx_pin);
   
   return true;
 }
@@ -181,7 +183,7 @@ boolean lw_setup(int tx_pin, int rx_pin, int interrupt) {
   Set things up to transmit and receive LightwaveRF 434Mhz messages using default values
 **/
 void lw_setup() {
-  lw_setup(3, 2, 0);
+  lw_setup(3, 2);
 }
 
 /**
@@ -205,7 +207,7 @@ void lw_send_bit(byte b) {
 void lw_tx_byte(byte b) {
   lw_send_bit(HIGH);
 
-  for (byte mask = B10000000; mask; mask >>= 1) {
+  for (byte mask = 0x80; mask; mask >>= 1) {
     lw_send_bit(b & mask);
   }
 }
@@ -214,7 +216,7 @@ void lw_tx_byte(byte b) {
   Send a LightwaveRF message
 **/
 void lw_send(byte* msg) {
-  cli();
+  //cli();
   for(byte j=0;j<lw_repeats;j++) {
     // send a start bit
     lw_send_bit(HIGH);
@@ -228,7 +230,7 @@ void lw_send(byte* msg) {
 	// Delay between repeats
     delayMicroseconds(10250);
   } 
-  sei();  
+  //sei();  
 }
 
 /**

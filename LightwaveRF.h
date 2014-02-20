@@ -5,7 +5,25 @@
 // Author: Lawrie Griffiths (lawrie.griffiths@ntlworld.com)
 // Copyright (C) 2012 Lawrie Griffiths
 
-#include <Arduino.h>
+#include <wiringPi.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#define NULL 0
+#define CHANGE 1
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+typedef uint8_t boolean;
+typedef uint8_t byte;
+
+#if !defined(NULL)
+#endif
+#ifdef __cplusplus
+}
+#endif
 
 #define LW_OFF 0
 #define LW_ON 1
@@ -13,9 +31,9 @@
 
 extern void lw_tx_setup(int tx_pin);
 
-extern void lw_rx_setup(int rx_pin, int interrupt);
+extern void lw_rx_setup(int rx_pin);
 
-extern boolean lw_setup(int tx_pin, int rx_pin, int interrupt);
+extern boolean lw_setup(int tx_pin, int rx_pin);
 
 extern void lw_setup();
 
