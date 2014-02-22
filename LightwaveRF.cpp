@@ -173,6 +173,7 @@ boolean lw_setup(int tx_pin, int rx_pin) {
   }
   
   wiringPiSetup();
+  piHiPri(10);
   lw_tx_setup(tx_pin);
   lw_rx_setup(rx_pin);
   
@@ -183,7 +184,7 @@ boolean lw_setup(int tx_pin, int rx_pin) {
   Set things up to transmit and receive LightwaveRF 434Mhz messages using default values
 **/
 void lw_setup() {
-  lw_setup(3, 2);
+  lw_setup(1, 0);
 }
 
 /**
