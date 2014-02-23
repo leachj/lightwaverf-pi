@@ -5,7 +5,12 @@
 // Author: Lawrie Griffiths (lawrie.griffiths@ntlworld.com)
 // Copyright (C) 2013 Lawrie Griffiths
 
-#include "LightwaveRF.h"
+#include "lightwaverf.h"
+
+
+#define false 0 
+#define true !(false)
+#define LW_MSG_LEN 10
 
 static byte lw_nibble[] = {0xF6,0xEE,0xED,0xEB,0xDE,0xDD,0xDB,0xBE,
                      0xBD,0xBB,0xB7,0x7E,0x7D,0x7B,0x77,0x6F};
@@ -14,8 +19,7 @@ static int lw_rx_pin;
 static int lw_tx_pin;
 
 static volatile boolean lw_got_message = false; // true when full message received
-static const byte lw_msg_len = 10; // the expected length of the message
-static byte lw_msg[lw_msg_len]; // the message received
+static byte lw_msg[LW_MSG_LEN]; // the message received
 
 static byte lw_byte; // The current byte
 static byte lw_num_bits = 0; // number of bits in the current byte
@@ -104,14 +108,15 @@ void lw_process_bits() {
   }
   
   // See if we have the whole message
-  if (lw_p_started && lw_num_bytes == lw_msg_len) {
+  if (lw_p_started && lw_num_bytes == LW_MSG_LEN) {
     lw_got_message = true;
     lw_p_started = false;
   }
 }
 
 void lw_get_error_stats(long* inv) {
-  for(int i=0;i<4;i++) inv[i] = lw_num_invalid_packets[i];
+  int i;
+  for(i=0;i<4;i++) inv[i] = lw_num_invalid_packets[i];
 }
 
 
@@ -138,9 +143,9 @@ boolean lw_get_message(byte  *buf, byte *len) {
   if (!lw_got_message) return false;
   
   // Buffer length must be 10
-  if (*len != lw_msg_len) return false;
+  if (*len != LW_MSG_LEN) return false;
   
-  memcpy(buf,lw_msg,lw_msg_len);
+  memcpy(buf,lw_msg,LW_MSG_LEN);
 
   lw_got_message = false;
   return true;
@@ -167,7 +172,7 @@ void lw_rx_setup(int rx_pin) {
 /**
   Set things up to transmit and receive LightwaveRF 434Mhz messages using the values specified
 **/
-boolean lw_setup(int tx_pin, int rx_pin) {
+boolean lw_setup_pins(int tx_pin, int rx_pin) {
   if(tx_pin == rx_pin) {
     return false;
   }
@@ -184,7 +189,7 @@ boolean lw_setup(int tx_pin, int rx_pin) {
   Set things up to transmit and receive LightwaveRF 434Mhz messages using default values
 **/
 void lw_setup() {
-  lw_setup(1, 0);
+  lw_setup_pins(1, 0);
 }
 
 /**
@@ -207,8 +212,8 @@ void lw_send_bit(byte b) {
 **/
 void lw_tx_byte(byte b) {
   lw_send_bit(HIGH);
-
-  for (byte mask = 0x80; mask; mask >>= 1) {
+  byte mask;
+  for (mask = 0x80; mask; mask >>= 1) {
     lw_send_bit(b & mask);
   }
 }
@@ -218,12 +223,14 @@ void lw_tx_byte(byte b) {
 **/
 void lw_send(byte* msg) {
   //cli();
-  for(byte j=0;j<lw_repeats;j++) {
+  byte j;
+  for(j=0;j<lw_repeats;j++) {
     // send a start bit
     lw_send_bit(HIGH);
     
 	// Send the 10 bytes
-    for(byte i=0;i<lw_msg_len;i++) lw_tx_byte(msg[i]);
+    byte i;
+    for(i=0;i<LW_MSG_LEN;i++) lw_tx_byte(msg[i]);
     
     // send end bit
     lw_send_bit(HIGH);
@@ -245,7 +252,8 @@ void lw_cmd(byte level, byte channel, byte cmd, byte* id) {
   msg[2] = lw_nibble[channel];
   msg[3] = lw_nibble[cmd];
   
-  for(int i=0;i<6;i++) {
+  int i;
+  for(i=0;i<6;i++) {
     msg[4+i] = id[i];
   }
   lw_send(msg);

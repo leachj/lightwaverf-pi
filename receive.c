@@ -1,9 +1,10 @@
-#include "LightwaveRF.h"
+#include "lightwaverf.h"
 #include <stdlib.h>
 
 
 void printMsg(byte *msg, byte len) {
-  for(int i=0;i<len;i++) {
+  int i;
+  for(i=0;i<len;i++) {
     printf("%02X ",msg[i]);
   }
   printf("\n");
