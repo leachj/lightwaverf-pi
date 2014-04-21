@@ -6,7 +6,7 @@
 // Copyright (C) 2013 Lawrie Griffiths
 
 #include "lightwaverf.h"
-
+#include <unistd.h>
 
 #define false 0 
 #define true !(false)
@@ -25,6 +25,7 @@ static byte lw_byte; // The current byte
 static byte lw_num_bits = 0; // number of bits in the current byte
 static unsigned long lw_prev; // time of previous pulse
 static volatile boolean lw_p_started = false; // packet started
+static volatile boolean sending = false; // packet started
 static boolean lw_b_started = false; // byte started
 static byte lw_num_bytes = 0; // number of bytes received 
 
@@ -38,8 +39,8 @@ static long lw_num_invalid_packets[4];
   and constructs a message when a valid packet of data is received.
 **/
 void lw_process_bits() { 
-  // Don't process bits when a message is already ready
-  if (lw_got_message) return;
+  // Don't process bits when a message is already ready or we are sending
+  if (lw_got_message || sending) return;
   
   byte v = digitalRead(lw_rx_pin); // the current value
   unsigned long curr = micros(); // the current time in microseconds
@@ -125,7 +126,9 @@ void lw_get_error_stats(long* inv) {
 **/
 void lw_rx_wait()
 {
-    while (!lw_got_message);
+    while (!lw_got_message){
+	usleep(100);
+    }
 }
 
 /**
@@ -222,7 +225,7 @@ void lw_tx_byte(byte b) {
   Send a LightwaveRF message
 **/
 void lw_send(byte* msg) {
-  //cli();
+  sending = true;
   byte j;
   for(j=0;j<lw_repeats;j++) {
     // send a start bit
@@ -238,7 +241,7 @@ void lw_send(byte* msg) {
 	// Delay between repeats
     delayMicroseconds(10250);
   } 
-  //sei();  
+  sending = false;
 }
 
 /**
