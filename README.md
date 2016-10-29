@@ -14,13 +14,15 @@ To compile the code you will need wiring pi installed. Instructions can be found
 5. Run `make` followed by `sudo make install` this will build the library and two example programs: send and receive.
 
 <h2>To setup a new device:</h2>
-1. Browse to the directory where the lightwaverf-pi project is installed `cd /home/pi/lightwaverf-pi`</li>
-2. Put the LightWaveRF device into pairing mode (normally hold a blue button or hold both buttons on a wall dimmer).</li>
-3. <b>If you have only one device</b> on your network using the `./send 1` command. This will assign the LightWaveRF device the ID "F296D1" unit 2.</li>
-4. <b>If you have multiple devices</b> or want to specify the device ID, use the command `./send F296C0 3 1`
-* Where F296C0 is the ID that you want to assign</li>
-* Where 3 is the unit, this would equate to button 2 if you use a lightwave handheld remote control</li>
-* Where 1 is the signal for on, this could be 0 for setting up purposes</li>
+When a lightwaverf unit is in pairing mode, the next code (id and unit) it receives will become it's new code.
+An id is a group code and a unit is the number within the group.
+1. Browse to the directory where the lightwaverf-pi project is installed `cd /home/pi/lightwaverf-pi`
+2. Put the LightWaveRF unit into pairing mode (normally hold a blue button or hold both buttons on a wall dimmer).
+3. <b>If you have only one unit</b> on your network using the `./send 1` command. This will assign the LightWaveRF device the ID "F296D1" unit 2.
+4. <b>If you have multiple units</b> or want to specify the device ID, use the command `./send F296C0 3 1`
+* Where F296C0 is the ID that you want to assign. You can make this code up yourself, it requires 6 hex (0 to F) characters
+* Where 3 is the unit, this would equate to button 2 if you use a lightwave handheld remote control
+* Where 1 is the signal for on, this could be 0 for setting up purposes
 
 <h2>Usage</h2>
 `send <0,1>` will send either a off or on signal to device F296D1 unit 2. 
