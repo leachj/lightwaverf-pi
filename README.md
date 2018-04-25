@@ -29,6 +29,8 @@ An id is a group code and a unit is the number within the group.
 
 `send F296C0 3 <0,1>` will send either off or on to device F296C0 unit 3.
 
+`send F296C0 3 0 [0-100]` will send either a dimmable value between 0 and 100 to device F296C0 unit 3.
+
 `receive` will print out all of the code it receives. 
 
 These command will also make the library available for other programs to use with the .so files in /usr/local/lib and the lightwaverf.h file into /usr/local/include
