@@ -1,5 +1,7 @@
 #include "lightwaverf.h"
 #include <stdlib.h>
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 byte data[] = { 0xf6, // header - constant
                 0xf6, // header - constant
@@ -42,8 +44,21 @@ int main(int argc, char *argv[]) //argc is the number of arguments passed in, ./
         int command  = atoi(argv[1]);
         char id[] = "f296d1";
         int unit = 2;
+        byte dimmValue = 0x40;
+        bool useDimmerValue = false;
 
-        if (argc == 4)
+        if (argc == 5)
+        {
+                // so we want a range between 0x9f and 0x40 (159 - 64 = 95)
+                // Users input will be between 0 and 100, so we want to limit between 0 and 95.
+                int userDimmValue = atoi(argv[4]);
+                userDimmValue = MAX(userDimmValue, 95);
+                userDimmValue = MIN(userDimmValue, 0);
+                // So add the users 0 to 95 to the 0x40(64) and store as byte
+                dimmValue += (byte)userDimmValue;
+                useDimmerValue = true;
+        }
+        else if (argc == 4)
         {
                 strcpy(id, argv[1]); // set id to arg 1
                 unit = atoi(argv[2]); //set the unit number
@@ -74,7 +89,15 @@ int main(int argc, char *argv[]) //argc is the number of arguments passed in, ./
 
 
         message[2] = lookup[unit-1]; // write which unit we require to the message. we minus one as the unit is zero based index
-        message[3] = lookup[command]; // convert the command  and put into the message
+        if (!useDimmerValue)
+        {
+                message[3] = lookup[command]; // convert the command  and put into the message
+        }
+        else
+        {
+                message[3] = dimmValue; // set the dimmer Value 
+        }
+          
         printf("sending command[%i] to ID:[%s] \n", command, id);
 
         lw_send(message);
